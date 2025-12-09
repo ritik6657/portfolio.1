@@ -283,3 +283,375 @@ Once all checked, you're ready to go! 🎉
 5. 🌐 **Domain** - Connect your custom domain
 
 **Your app is production-ready!** 🎊
+
+
+
+**==========SQL=========**
+-- ============================================
+-- FIRST TIME SUPABASE SETUP SCRIPT (NO DROP STATEMENTS)
+-- Safe to run on a blank database
+-- ============================================
+
+-- ============================================
+-- 1. CREATE TABLES
+-- ============================================
+
+CREATE TABLE projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE clients (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  designation TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE contact_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  mobile TEXT,
+  city TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  subscribed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- 2. INDEXES
+-- ============================================
+
+CREATE INDEX idx_projects_created_at ON projects(created_at DESC);
+CREATE INDEX idx_clients_created_at ON clients(created_at DESC);
+
+CREATE INDEX idx_contact_requests_email ON contact_requests(email);
+CREATE INDEX idx_contact_requests_created_at ON contact_requests(created_at DESC);
+
+CREATE INDEX idx_newsletter_subscribers_email ON newsletter_subscribers(email);
+CREATE INDEX idx_newsletter_subscribers_subscribed_at ON newsletter_subscribers(subscribed_at DESC);
+
+-- ============================================
+-- 3. ENABLE RLS
+-- ============================================
+
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contact_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- 4. RLS POLICIES
+-- ============================================
+
+-- Projects
+CREATE POLICY "Allow public read for projects"
+  ON projects FOR SELECT USING (true);
+
+CREATE POLICY "Allow authenticated insert for projects"
+  ON projects FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated update for projects"
+  ON projects FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated delete for projects"
+  ON projects FOR DELETE TO authenticated USING (true);
+
+-- Clients
+CREATE POLICY "Allow public read for clients"
+  ON clients FOR SELECT USING (true);
+
+CREATE POLICY "Allow authenticated insert for clients"
+  ON clients FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated update for clients"
+  ON clients FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated delete for clients"
+  ON clients FOR DELETE TO authenticated USING (true);
+
+-- Contact Requests
+CREATE POLICY "Allow public insert for contact requests"
+  ON contact_requests FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated read for contacts"
+  ON contact_requests FOR SELECT TO authenticated USING (true);
+
+-- Newsletter Subscribers
+CREATE POLICY "Allow public insert for newsletter"
+  ON newsletter_subscribers FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated read for subscribers"
+  ON newsletter_subscribers FOR SELECT TO authenticated USING (true);
+
+-- ============================================
+-- 5. TRIGGERS
+-- ============================================
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_projects_updated_at
+  BEFORE UPDATE ON projects
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_clients_updated_at
+  BEFORE UPDATE ON clients
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================
+-- 6. STORAGE POLICIES (Bucket must already exist)
+-- ============================================
+
+CREATE POLICY "Public can view images"
+ON storage.objects FOR SELECT TO public
+USING (bucket_id = 'projects');
+
+CREATE POLICY "Authenticated users can upload images"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (bucket_id = 'projects');
+
+CREATE POLICY "Authenticated users can update images"
+ON storage.objects FOR UPDATE TO authenticated
+USING (bucket_id = 'projects') WITH CHECK (bucket_id = 'projects');
+
+CREATE POLICY "Authenticated users can delete images"
+ON storage.objects FOR DELETE TO authenticated
+USING (bucket_id = 'projects');
+
+-- ============================================
+-- DONE
+-- ============================================
+
+-- ============================================
+-- COMPLETE SUPABASE SETUP SCRIPT
+-- Full-Stack Portfolio Application
+-- ============================================
+
+-- ============================================
+-- 1. DROP EXISTING POLICIES (SAFE RESET)
+-- ============================================
+
+DROP POLICY IF EXISTS "Allow public read for projects" ON projects;
+DROP POLICY IF EXISTS "Allow authenticated insert for projects" ON projects;
+DROP POLICY IF EXISTS "Allow authenticated update for projects" ON projects;
+DROP POLICY IF EXISTS "Allow authenticated delete for projects" ON projects;
+
+DROP POLICY IF EXISTS "Allow public read for clients" ON clients;
+DROP POLICY IF EXISTS "Allow authenticated insert for clients" ON clients;
+DROP POLICY IF EXISTS "Allow authenticated update for clients" ON clients;
+DROP POLICY IF EXISTS "Allow authenticated delete for clients" ON clients;
+
+DROP POLICY IF EXISTS "Allow public insert for contact requests" ON contact_requests;
+DROP POLICY IF EXISTS "Allow authenticated read for contacts" ON contact_requests;
+
+DROP POLICY IF EXISTS "Allow public insert for newsletter" ON newsletter_subscribers;
+DROP POLICY IF EXISTS "Allow authenticated read for subscribers" ON newsletter_subscribers;
+
+-- STORAGE POLICIES RESET
+DROP POLICY IF EXISTS "Public can view images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can update images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can delete images" ON storage.objects;
+
+
+-- ============================================
+-- 2. CREATE TABLES (SAFE, ONLY IF MISSING)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS clients (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  designation TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS contact_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  mobile TEXT,
+  city TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  subscribed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+
+-- ============================================
+-- 3. INDEXES (AUTO OPTIMIZATION)
+-- ============================================
+
+CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_clients_created_at ON clients(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_contact_requests_email ON contact_requests(email);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_created_at ON contact_requests(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_newsletter_subscribers_email ON newsletter_subscribers(email);
+CREATE INDEX IF NOT EXISTS idx_newsletter_subscribers_subscribed_at ON newsletter_subscribers(subscribed_at DESC);
+
+
+-- ============================================
+-- 4. ENABLE RLS
+-- ============================================
+
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contact_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+
+
+-- ============================================
+-- 5. RLS POLICIES
+-- ============================================
+
+-- PROJECTS
+CREATE POLICY "Allow public read for projects"
+  ON projects FOR SELECT USING (true);
+
+CREATE POLICY "Allow authenticated insert for projects"
+  ON projects FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated update for projects"
+  ON projects FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated delete for projects"
+  ON projects FOR DELETE TO authenticated USING (true);
+
+-- CLIENTS
+CREATE POLICY "Allow public read for clients"
+  ON clients FOR SELECT USING (true);
+
+CREATE POLICY "Allow authenticated insert for clients"
+  ON clients FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated update for clients"
+  ON clients FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated delete for clients"
+  ON clients FOR DELETE TO authenticated USING (true);
+
+-- CONTACT REQUESTS
+CREATE POLICY "Allow public insert for contact requests"
+  ON contact_requests FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated read for contacts"
+  ON contact_requests FOR SELECT TO authenticated USING (true);
+
+-- NEWSLETTER SUBSCRIBERS
+CREATE POLICY "Allow public insert for newsletter"
+  ON newsletter_subscribers FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated read for subscribers"
+ ON newsletter_subscribers FOR SELECT TO authenticated USING (true);
+
+
+-- ============================================
+-- 6. TIMESTAMP UPDATE TRIGGERS
+-- ============================================
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
+CREATE TRIGGER update_projects_updated_at
+  BEFORE UPDATE ON projects
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_clients_updated_at ON clients;
+CREATE TRIGGER update_clients_updated_at
+  BEFORE UPDATE ON clients
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+
+-- ============================================
+-- 7. STORAGE POLICIES FOR BUCKET "projects"
+-- (Bucket must exist manually)
+-- ============================================
+
+CREATE POLICY "Public can view images"
+ON storage.objects FOR SELECT TO public
+USING (bucket_id = 'projects');
+
+CREATE POLICY "Authenticated users can upload images"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (bucket_id = 'projects');
+
+CREATE POLICY "Authenticated users can update images"
+ON storage.objects FOR UPDATE TO authenticated
+USING (bucket_id = 'projects') WITH CHECK (bucket_id = 'projects');
+
+CREATE POLICY "Authenticated users can delete images"
+ON storage.objects FOR DELETE TO authenticated
+USING (bucket_id = 'projects');
+
+
+-- ============================================
+-- 8. VERIFICATION QUERIES
+-- ============================================
+
+-- Tables
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
+AND table_name IN ('projects', 'clients', 'contact_requests', 'newsletter_subscribers');
+
+-- RLS Status
+SELECT tablename, rowsecurity FROM pg_tables
+WHERE schemaname = 'public'
+AND tablename IN ('projects', 'clients', 'contact_requests', 'newsletter_subscribers');
+
+-- Policies
+SELECT schemaname, tablename, policyname
+FROM pg_policies
+WHERE tablename IN ('projects','clients','contact_requests','newsletter_subscribers')
+ORDER BY tablename, policyname;
+
+-- Storage Policies
+SELECT policyname, roles, cmd
+FROM pg_policies
+WHERE schemaname = 'storage' AND tablename = 'objects'
+ORDER BY policyname;
+
+-- ============================================
+-- SETUP COMPLETE
+-- ============================================
+##done##
