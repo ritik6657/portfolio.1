@@ -27,12 +27,17 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 async function middleware(request) {
+    // Check if Supabase environment variables are configured
+    const supabaseUrl = ("TURBOPACK compile-time value", "https://caawxxcgckxdhrihjfwb.supabase.co");
+    const supabaseAnonKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYXd4eGNnY2t4ZGhyaWhqZndiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyOTQ1NDQsImV4cCI6MjA4MDg3MDU0NH0.fitT9WkcULBDHgpfvLjXJlGIE2gb5JBqyZiu62WmcbY");
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
     let response = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].next({
         request: {
             headers: request.headers
         }
     });
-    const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$createServerClient$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["createServerClient"])(("TURBOPACK compile-time value", "https://wnoerigksjvmfvkiiaus.supabase.co"), ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indub2VyaWdrc2p2bWZ2a2lpYXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNzU3NjUsImV4cCI6MjA4MDg1MTc2NX0.FNIgeB6bVMmFLVtfp6O7i8p9lXVyM60TgzDFn8ZZs7Q"), {
+    const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$createServerClient$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["createServerClient"])(supabaseUrl, supabaseAnonKey, {
         cookies: {
             getAll () {
                 return request.cookies.getAll();
@@ -46,19 +51,30 @@ async function middleware(request) {
             }
         }
     });
-    // Refresh session if expired
-    const { data: { user } } = await supabase.auth.getUser();
-    // Protect admin routes
-    if (request.nextUrl.pathname.startsWith("/admin")) {
-        if (!user) {
-            // Redirect to login page
+    // Refresh session if expired - wrap in try-catch to handle API failures
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        // Protect admin routes
+        if (request.nextUrl.pathname.startsWith("/admin")) {
+            if (!user) {
+                // Redirect to login page
+                const redirectUrl = request.nextUrl.clone();
+                redirectUrl.pathname = "/auth/login";
+                redirectUrl.searchParams.set("redirectTo", request.nextUrl.pathname);
+                return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].redirect(redirectUrl);
+            }
+        }
+        return response;
+    } catch (error) {
+        console.error("Middleware error while checking auth:", error);
+        // On error, allow the request to proceed but redirect admin routes to home
+        if (request.nextUrl.pathname.startsWith("/admin")) {
             const redirectUrl = request.nextUrl.clone();
-            redirectUrl.pathname = "/auth/login";
-            redirectUrl.searchParams.set("redirectTo", request.nextUrl.pathname);
+            redirectUrl.pathname = "/";
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].redirect(redirectUrl);
         }
+        return response;
     }
-    return response;
 }
 const config = {
     matcher: [

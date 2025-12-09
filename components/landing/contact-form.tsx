@@ -95,7 +95,7 @@ export function ContactForm({ hero }: ContactFormProps) {
                 <FormItem>
                   <FormLabel>Mobile Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="+1 (555) 000-0000" {...field} />
+                    <Input placeholder="+91 7354487112" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

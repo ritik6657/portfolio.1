@@ -29,9 +29,9 @@ export function Footer() {
           <div>
             <h3 className="font-bold">Contact</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Email: info@portfolio.com
+              Email: ritikraghuwanshi@gmail.com
               <br />
-              Phone: +1 (555) 000-0000
+              Phone:+91 7354487112
             </p>
           </div>
         </div>
