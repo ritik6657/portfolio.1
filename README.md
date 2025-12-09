@@ -1,6 +1,6 @@
 Full-Stack Portfolio Application
 
-Hosted Live At: https://sexyritik.vercel.app
+Hosted Live At: https://ritiksdike.vercel.app
 
 A modern, production-ready full-stack web application built with Next.js 14, Supabase, and ShadCN UI. Features a beautiful landing page, complete admin panel with CRUD operations, dual theme system, and image upload with cropping.
 ## ✨ Features
