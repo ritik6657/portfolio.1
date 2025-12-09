@@ -917,13 +917,13 @@ function Footer() {
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     className: "mt-2 text-sm text-muted-foreground",
                                     children: [
-                                        "Email: info@portfolio.com",
+                                        "Email: ritikraghuwanshi@gmail.com",
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
                                             fileName: "[project]/components/landing/footer.tsx",
                                             lineNumber: 33,
                                             columnNumber: 15
                                         }, this),
-                                        "Phone: +1 (555) 000-0000"
+                                        "Phone:+91 7354487112"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/landing/footer.tsx",
