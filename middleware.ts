@@ -44,23 +44,34 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    // Refresh session if expired
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    // Refresh session if expired - wrap in try-catch to handle API failures
+    try {
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
 
-    // Protect admin routes
-    if (request.nextUrl.pathname.startsWith("/admin")) {
-        if (!user) {
-            // Redirect to login page
+        // Protect admin routes
+        if (request.nextUrl.pathname.startsWith("/admin")) {
+            if (!user) {
+                // Redirect to login page
+                const redirectUrl = request.nextUrl.clone()
+                redirectUrl.pathname = "/auth/login"
+                redirectUrl.searchParams.set("redirectTo", request.nextUrl.pathname)
+                return NextResponse.redirect(redirectUrl)
+            }
+        }
+
+        return response
+    } catch (error) {
+        console.error("Middleware error while checking auth:", error)
+        // On error, allow the request to proceed but redirect admin routes to home
+        if (request.nextUrl.pathname.startsWith("/admin")) {
             const redirectUrl = request.nextUrl.clone()
-            redirectUrl.pathname = "/auth/login"
-            redirectUrl.searchParams.set("redirectTo", request.nextUrl.pathname)
+            redirectUrl.pathname = "/"
             return NextResponse.redirect(redirectUrl)
         }
+        return response
     }
-
-    return response
 }
 
 export const config = {
